@@ -1,0 +1,48 @@
+# Feel free to change any variable unless specifically warned not to (Marked with {})
+# If there is an "_" at the written variable then make sure the new variable contains that at beginning
+
+# Define Variable for blocked words (You can replace the variable but keep the "{<text>::<text>::*}" format)
+set {variable::blocked::*} to "example1", "example2"
+
+
+# Define Variable for allowed words
+set {variable::allowed::*} to "example3", "example4"
+
+
+# Function for filtering word and punishing sender
+function filterWord():
+    set {_p} to sender
+    if {variable::punished::%{_p}%} is set:
+        set {_offense} to {variable::punished::%{_p}%}
+        add 1 to {variable::punished::%{_p}%}
+        set {_time} to ({_offense}*5) + 15
+        if {_time} >= 60:
+            set {_time} to {_time}/60
+            set {_time} to round {_time}
+            cancel event
+            send "&cThis word is blocked! Please create a ticket in our Discord if you wish to appeal this punishment." to {_p}
+        # Command requires Litebans or other plugin with similar command syntax, otherwise change to fit
+        # Command format: "tempmute <player> <Reason> <Time>" (After <time> add unit with w, d, h, m, s; Weeks, Days, Hours, Minutes, Seconds)
+            execute console command "tempmute {_p} Swore (Offense: {_offense}) {_time}h"
+        else:
+            cancel event
+            send "&cThis word is blocked! Please create a ticket in our Discord if you wish to appeal this punishment." to {_p}
+            execute console command "tempmute {_p} Swore (Offense: {_offense}) {_time}m"
+    else:
+        set {variable::punished::%{_p}%} to 1
+        set {_offense} to {variable::punished::%{_p}%}
+        set {_time} to 15
+        cancel event
+        send "&cThis word is blocked! Please create a ticket in our Discord if you wish to appeal this punishment." to {_p}
+        execute console command "tempmute {_p} Swore (Offense: {_offense}) {_time}m"
+
+# Function for checking words (No need for "def" in this language)
+function checkFiltered():
+    set {_msgVar} to message
+    if {_msgVar} contains {variable::blocked::*}:
+        if {_msgVar} contains {variable::allowed::*}:
+            stop
+        else:
+            filterWord()
+on chat:
+    checkFiltered()
