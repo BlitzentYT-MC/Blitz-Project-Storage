@@ -1,16 +1,25 @@
 # Feel free to change any variable unless specifically warned not to (Marked with {})
 # If there is an "_" at the written variable then make sure the new variable contains that at beginning
 
-# Define Variable for blocked words (You can replace the variable but keep the "{<text>::<text>::*}" format)
-set {variable::blocked::*} to "example1", "example2", and "example3"
+# (You can replace the variable but keep the "{<text>::<text>::*}" format)
+on load:
+	# Define Variable for blocked words 
+	if {variable::blocked::*} is not set:
+		set {variable::blocked::*} to "a", "b", "c"
+		stop
+		
+	# Define Variable for allowed words
+	if {variable::allowed::*} is not set:
+		set {variable::allowed::*} to "d", "e", and "f"
+		stop
+    else:
+        stop
 
 
-# Define Variable for allowed words
-set {variable::allowed::*} to "example4", "example5", and "example6"
 
 
 # Function for filtering word and punishing sender
-function filterWord():
+function wordFilter():
     set {_p} to sender
     if {variable::punished::%{_p}%} is set:
         set {_offense} to {variable::punished::%{_p}%}
@@ -43,47 +52,48 @@ on chat:
         if {_msgVar} contains {variable::allowed::*}:
             stop
         else:
-            filterWord()
+            wordFilter()
 
 # Command which allows staff of you choosing to change what is allowed or blocked by the filter
 command /filter <text> <text>:
     aliases: /chatfilter
     permission: filter.change
     permission message: "&cNo"
-    if arg-1 is not set:
-        send "&6Usage: &c/filter (allow|block) <word>" to sender
-        stop
-    else if arg-2 is not set:
-        send "&6Usage: &c/filter (allow|block) <word>" to sender
-        stop
-    else:
-        # To allow a new word
-        if arg-1 is "allow":
-            set {_toAllow} to arg-2
-            if {_toAllow} is in {variable::blocked::*}:
-                remove {_toAllow} from {variable::blocked::*}
-                add {_toAllow} to {variable::allowed::*}
-                send "&6%{_toAllow}% &#00FF80has been removed from the list of blocked words! &6%{_toAllow}% &#00FF80has also been added to the list of allowed words!" to sender
-                stop
-            else if {_toAllow} is in {variable::allowed::*}:
-                send "&6%{_toAllow}% &cis already in the list of allowed words!" to sender
-                stop
-            else:
-                add {_toAllow} to {variable::allowed::*}
-                send "&6%{_toAllow}% &#00FF80has been added to the list of allowed words!" to sender
-                stop
-        # To block a new word
-        else if arg-1 is "block":
-            set {_toBlock} to arg-2
-            if {_toBlock} is in {variable::allowed::*}:
-                remove {_toBlock} from {variable::allowed::*}
-                add {_toBlock} to {variable::blocked::*}
-                send "&6%{_toBlock}% &chas been removed from list of allowed words! &6%{_toBlock}% &chas also been added to the list of blocked words!" to sender
-                stop
-            else if {_toBlock} is in {variable::blocked::*}:
-                send "&6%{_toBlock}% &cis already in the list of blocked words!" to sender
-                stop
-            else:
-                add {_toBlock} to {variable::blocked::*}
-                send "&6%{_toBlock}% &chas been added to the list of blocked words!" to sender
-                stop
+    trigger:
+        if arg-1 is not set:
+            send "&6Usage: &c/filter (allow|block) <word>" to sender
+            stop
+        else if arg-2 is not set:
+            send "&6Usage: &c/filter (allow|block) <word>" to sender
+            stop
+        else:
+            # To allow a new word
+            if arg-1 is "allow":
+                set {_toAllow} to arg-2
+                if {_toAllow} is in {variable::blocked::*}:
+                    remove {_toAllow} from {variable::blocked::*}
+                    add {_toAllow} to {variable::allowed::*}
+                    send "&6%{_toAllow}% &#00FF80has been removed from the list of blocked words! &6%{_toAllow}% &#00FF80has also been added to the list of allowed words!" to sender
+                    stop
+                else if {_toAllow} is in {variable::allowed::*}:
+                    send "&6%{_toAllow}% &cis already in the list of allowed words!" to sender
+                    stop
+                else:
+                    add {_toAllow} to {variable::allowed::*}
+                    send "&6%{_toAllow}% &#00FF80has been added to the list of allowed words!" to sender
+                    stop
+            # To block a new word
+            else if arg-1 is "block":
+                set {_toBlock} to arg-2
+                if {_toBlock} is in {variable::allowed::*}:
+                    remove {_toBlock} from {variable::allowed::*}
+                    add {_toBlock} to {variable::blocked::*}
+                    send "&6%{_toBlock}% &chas been removed from list of allowed words! &6%{_toBlock}% &chas also been added to the list of blocked words!" to sender
+                    stop
+                else if {_toBlock} is in {variable::blocked::*}:
+                    send "&6%{_toBlock}% &cis already in the list of blocked words!" to sender
+                    stop
+                else:
+                    add {_toBlock} to {variable::blocked::*}
+                    send "&6%{_toBlock}% &chas been added to the list of blocked words!" to sender
+                    stop
