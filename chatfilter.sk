@@ -2,11 +2,11 @@
 # If there is an "_" at the written variable then make sure the new variable contains that at beginning
 
 # Define Variable for blocked words (You can replace the variable but keep the "{<text>::<text>::*}" format)
-set {variable::blocked::*} to "example1", "example2"
+set {variable::blocked::*} to "example1", "example2", and "example3"
 
 
 # Define Variable for allowed words
-set {variable::allowed::*} to "example3", "example4"
+set {variable::allowed::*} to "example4", "example5", and "example6"
 
 
 # Function for filtering word and punishing sender
@@ -67,7 +67,7 @@ command /filter <text> <text>:
                 add {_toAllow} to {variable::allowed::*}
                 send "&6%{_toAllow}% &#00FF80has been removed from the list of blocked words! &6%{_toAllow}% &#00FF80has also been added to the list of allowed words!" to sender
                 stop
-            else if {_toAllow} is in {variable::allowed::*}
+            else if {_toAllow} is in {variable::allowed::*}:
                 send "&6%{_toAllow}% &cis already in the list of allowed words!" to sender
                 stop
             else:
@@ -82,7 +82,7 @@ command /filter <text> <text>:
                 add {_toBlock} to {variable::blocked::*}
                 send "&6%{_toBlock}% &chas been removed from list of allowed words! &6%{_toBlock}% &chas also been added to the list of blocked words!" to sender
                 stop
-            else if {_toBlock} is in {variable::blocked::*}
+            else if {_toBlock} is in {variable::blocked::*}:
                 send "&6%{_toBlock}% &cis already in the list of blocked words!" to sender
                 stop
             else:
