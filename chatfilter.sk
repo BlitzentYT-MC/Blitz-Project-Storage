@@ -46,3 +46,46 @@ function checkFiltered():
             filterWord()
 on chat:
     checkFiltered()
+
+# Command which allows staff of you choosing to change what is allowed or blocked by the filter
+command /filter <text> <text>:
+    aliases: /chatfilter
+    permission: filter.change
+    permission message: "&cNo"
+    if arg-1 is not set:
+        send "&6Usage: &c/filter (allow|block) <word>" to sender
+        stop
+    else if arg-2 is not set:
+        send "&6Usage: &c/filter (allow|block) <word>" to sender
+        stop
+    else:
+        # To allow a new word
+        if arg-1 is "allow":
+            set {_toAllow} to arg-2
+            if {_toAllow} is in {variable::blocked::*}:
+                remove {_toAllow} from {variable::blocked::*}
+                add {_toAllow} to {variable::allowed::*}
+                send "&6%{_toAllow}% &#00FF80has been removed from the list of blocked words! &6%{_toAllow}% &#00FF80has also been added to the list of allowed words!" to sender
+                stop
+            else if {_toAllow} is in {variable::allowed::*}
+                send "&6%{_toAllow}% &cis already in the list of allowed words!" to sender
+                stop
+            else:
+                add {_toAllow} to {variable::allowed::*}
+                send "&6%{_toAllow}% &#00FF80has been added to the list of allowed words!" to sender
+                stop
+        # To block a new word
+        else if arg-1 is "block":
+            set {_toBlock} to arg-2
+            if {_toBlock} is in {variable::allowed::*}:
+                remove {_toBlock} from {variable::allowed::*}
+                add {_toBlock} to {variable::blocked::*}
+                send "&6%{_toBlock}% &chas been removed from list of allowed words! &6%{_toBlock}% &chas also been added to the list of blocked words!" to sender
+                stop
+            else if {_toBlock} is in {variable::blocked::*}
+                send "&6%{_toBlock}% &cis already in the list of blocked words!" to sender
+                stop
+            else:
+                add {_toBlock} to {variable::blocked::*}
+                send "&6%{_toBlock}% &chas been added to the list of blocked words!" to sender
+                stop
