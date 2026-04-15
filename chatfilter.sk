@@ -14,43 +14,37 @@ on load:
 		stop
 	else:
 		stop
-
-
-
-
-# Function for filtering word and punishing sender
-
 on chat:
-    # Function for checking words (No need for "def" in this language)
+    # Checks words
     set {_msgVar} to message
-    if {_msgVar} contains {variable::blocked::*}:
-        if {_msgVar} contains {variable::allowed::*}:
+    if {variable::blocked::*} contains {_msgVar}:
+        if {variable::allowed::*} contains {_msgVar}:
             stop
         else:
+            # Punishes player and Cancels message
+            cancel event
             set {_p} to sender
-        if {variable::punished::%{_p}%} is set:
-            set {_offense} to {variable::punished::%{_p}%}
-            add 1 to {variable::punished::%{_p}%}
-            set {_time} to ({_offense}*5) + 15
-            if {_time} >= 60:
-                set {_time} to {_time}/60
-                set {_time} to round {_time}
-                cancel event
-                send "&cThis word is blocked! Please create a ticket in our Discord if you wish to appeal this punishment." to {_p}
-            # Command requires Litebans or other plugin with similar command syntax, otherwise change to fit
-            # Command format: "tempmute <player> <Reason> <Time>" (After <time> add unit with w, d, h, m, s; Weeks, Days, Hours, Minutes, Seconds)
-                execute console command "tempmute {_p} Swore (Offense: {_offense}) {_time}h"
+            if {variable::punished::%player%} is set:
+                set {_offense} to {variable::punished::%player%}
+                add 1 to {variable::punished::%player%}
+                set {_time} to ({_offense}*5) + 15
+                if {_time} >= 60:
+                    set {_time} to {_time}/60
+                    set {_time} to round {_time}
+                    send "&cThis word is blocked! Please create a ticket in our Discord if you wish to appeal this punishment." to {_p}
+                # Command requires Litebans or other plugin with similar command syntax, otherwise change to fit
+                # Command format: "tempmute <player> <Reason> <Time>" (After <time> add unit with w, d, h, m, s; Weeks, Days, Hours, Minutes, Seconds)
+                    execute console command "tempmute %{_p}% Swore (Offense: %{_offense}%) %{_time}%h"
             else:
-                cancel event
                 send "&cThis word is blocked! Please create a ticket in our Discord if you wish to appeal this punishment." to {_p}
-                execute console command "tempmute {_p} Swore (Offense: {_offense}) {_time}m"
+                execute console command "tempmute %{_p}% Swore (Offense: {_offense}) %{_time}%m"
         else:
-            set {variable::punished::%{_p}%} to 1
-            set {_offense} to {variable::punished::%{_p}%}
+            set {variable::punished::%player%} to 1
+            set {_offense} to {variable::punished::%player%}
             set {_time} to 15
             cancel event
             send "&cThis word is blocked! Please create a ticket in our Discord if you wish to appeal this punishment." to {_p}
-            execute console command "tempmute {_p} Swore (Offense: {_offense}) {_time}m"
+            execute console command "tempmute %{_p}% Swore (Offense: %{_offense}%) %{_time}%m"
 
 # Command which allows staff of you choosing to change what is allowed or blocked by the filter
 command /filter <text> <text>:
