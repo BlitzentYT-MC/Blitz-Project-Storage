@@ -5,3 +5,4 @@ If the skript code does not work, then it may require one of more of the followi
 <br>-Skript
 <br>-skript-db
 <br>-skript-gui
+<br>-FoxPapiSkriptExpansion
