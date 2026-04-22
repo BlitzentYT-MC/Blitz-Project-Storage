@@ -16,21 +16,16 @@ command /referral [<text>]:
             set {_p} to player
             if {_p} is "BlitzentYT":
                 set {_code} to arg-1
-                loop {referrals::codes::*}:
-                    if loop-value is {_code}:
-                        loop {referrals::codes::%{_code}%::*}:
-                            if loop-value-2 is in {referrals::owner::%{_code}%::*}:
-                                if loop-value-2 is in {players::*}:
-                                    set {_toReward} to loop-value-2
-                                    send "&aReferral Successful!" to {_p}
-                                    execute console command "eco credits give %{_p}% 10"
-                                    execute console command "eco credits give %{_toReward}% 50"
-                                else:
-                                    send "&cReferral Failed. Please check spelling or contact administration!" to sender
-                            else:
-                                send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                if {referrals::codes::*} contains "%{_code}%":
+                    if {referrals.owner.%{_code}%} is set:
+                        set {_toReward} to {referrals.owner.%{_code}%}
+                        send "&aReferral Successful!" to {_p}
+                        execute console command "eco credits give %{_p}% 10"
+                        execute console command "eco credits give %{_toReward}% 50"
                     else:
                         send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                else:
+                    send "&cReferral Failed. Please check spelling or contact administration!" to sender
             else:
                 set {_time} to time since first login of {_p}
                 if {_time} is greater than 15 minutes:
@@ -38,21 +33,17 @@ command /referral [<text>]:
                     stop
                 else if {_time} is less than or equal to 15 minutes:
                     set {_code} to arg-1
-                    loop {referrals::codes::*}:
-                        if loop-value is {_code}:
-                            loop {referrals::codes::%{_code}%::*}:
-                                if loop-value-2 is in {referrals::owner::%{_code}%::*}:
-                                    if loop-value-2 is in {players::*}:
-                                        set {_toReward} to loop-value-2
-                                        send "&aReferral Successful!" to {_p}
-                                        execute console command "eco credits give %{_p}% 10"
-                                        execute console command "eco credits give %{_toReward}% 50"
-                                    else:
-                                        send "&cReferral Failed. Please check spelling or contact administration!" to sender
-                                else:
-                                    send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                    if {referrals::codes::*} contains "%{_code}%":
+                        if {referrals.owner.%{_code}%} is set:
+                            set {_toReward} to {referrals.owner.%{_code}%}
+                            send "&aReferral Successful!" to {_p}
+                            execute console command "eco credits give %{_p}% 10"
+                            execute console command "eco credits give %{_toReward}% 50"
+                            stop
                         else:
                             send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                    else:
+                        send "&cReferral Failed. Please check spelling or contact administration!" to sender
             
 command /createreferral [<text>]:
     permission: referral.create
@@ -72,8 +63,7 @@ command /createreferral [<text>]:
                             send "&cThis code is too similar to an existing one." to sender
                         else:
                             add "%{_toCreate}%" to {referrals::codes::*}
-                            add "%{_p}%" to {referrals::owner::%{_toCreate}%::*}
-                            add "%{_p}%" to {referrals::codes::%{_toCreate}%::*}
+                            set {referrals.owner.%{_toCreate}%} to "%{_p}%"
                             send "&aCode created successfully!" to sender
 command /deletereferral [<text>]:
     permission: referral.delete
@@ -85,11 +75,10 @@ command /deletereferral [<text>]:
             set {_p} to player
             set {_toDelete} to arg-1
             loop {referrals::codes::*}:
-                if loop-value-1 is "%{_toDelete}%":
-                    loop {referrals::owner::%{_toDelete}%::*}:
-                        if loop-value-2 is "%{_p}%":
-                            remove "%{_toDelete}%" from {referrals::codes::*}
-                            delete {referrals::owner::%{_toDelete}%::*}
-                            send "&aCode successfully deleted!" to sender
-                        else:
-                            send "&cYou are not allowed to delete a code that you do not own!" to sender
+                if loop-value is "%{_toDelete}%":
+                    if {referrals.owner.%{_toDelete}%} is "%{_p}%":
+                        remove "%{_toDelete}%" from {referrals::codes::*}
+                        delete {referrals.owner.%{_toDelete}%}
+                        send "&aCode successfully deleted!" to sender
+                    else:
+                        send "&cYou are not allowed to delete a code that you do not own!" to sender
