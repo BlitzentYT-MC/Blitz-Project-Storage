@@ -28,6 +28,8 @@ command /referral <code>:
                                 if loop-value is in {players::*}:
                                     set {_toReward} to loop-value
                                     send "&aReferral Successful!" to {_p}
+                                    execute console command "eco credits give %{_p}% 10"
+                                    execute console command "eco credits give %{_toReward}% 50"
                                 else:
                                     send "&cReferral Failed. Please check spelling or contact administration!" to sender
                             else:
@@ -41,9 +43,7 @@ command /referral <code>:
             
 command /createreferral <code>:
     permission: referral.create
-    permission message: "&cYou must have media rank to use this command."
-    cooldown: 7 days
-    cooldown message: "&cYou must wait 7 days between creating a code."
+    permission message: &cYou must have media rank to use this command.
     trigger:
         if arg-1 is not set:
             send "&6Usage:&c /createreferral <code> | Contact an admin for further help." to sender
@@ -59,11 +59,12 @@ command /createreferral <code>:
                             send "&cThis code is too similar to an existing one." to sender
                         else:
                             add "%{_toCreate}%" to {referrals::codes::*}
-                            add "%{_p}%" to {referrals::owner::%{toCreate}%}
+                            add "%{_p}%" to {referrals::owner::%{_toCreate}%}
+                            add "%{_p}%" to {referrals::codes::%{_toCreate}%::*}
                             send "&aCode created successfully!" to sender
 command /deletereferral <code>:
     permission: referral.delete
-    permission message: "&cYou must have media rank to use this command."
+    permission message: &cYou must have media rank to use this command.
     trigger:
         if arg-1 is not set:
             send "&6Usage:&c /deletereferral <code> | Contact an admin if this is incorrect." to sender
