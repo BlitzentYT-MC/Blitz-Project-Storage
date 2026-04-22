@@ -9,7 +9,7 @@ on join:
     loop {players::*}:
         if loop-value does not contain "%{_p}%":
             add "%{_p}%" to {players::*}
-command /referral <code>:
+command /referral [<text>]:
     trigger:
         if arg-1 is not set:
             send "&6Usage:&c /referral <code> | Contact an admin for further help." to sender
@@ -41,7 +41,7 @@ command /referral <code>:
                 else:
                     send "&cReferral Failed. Please check spelling or contact administration!" to sender
             
-command /createreferral <code>:
+command /createreferral [<text>]:
     permission: referral.create
     permission message: &cYou must have media rank to use this command.
     trigger:
@@ -62,7 +62,7 @@ command /createreferral <code>:
                             add "%{_p}%" to {referrals::owner::%{_toCreate}%}
                             add "%{_p}%" to {referrals::codes::%{_toCreate}%::*}
                             send "&aCode created successfully!" to sender
-command /deletereferral <code>:
+command /deletereferral [<text>]:
     permission: referral.delete
     permission message: &cYou must have media rank to use this command.
     trigger:
