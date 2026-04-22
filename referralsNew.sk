@@ -6,27 +6,22 @@ on load:
         set {referrals::owner::*} to empty
 on join:
     set {_p} to player
-    loop {players::*}:
-        if loop-value does not contain "%{_p}%":
-            add "%{_p}%" to {players::*}
+    if {players::*} does not contain "%{_p}%":
+        add "%{_p}%" to {players::*}
 command /referral [<text>]:
     trigger:
         if arg-1 is not set:
             send "&6Usage:&c /referral <code> | Contact an admin for further help." to sender
         else:
             set {_p} to player
-            set {_time} to time since first login of {_p}
-            if {_time} is greater than 15 minutes:
-                send "&cSorry, but you have been in this server for %{_time}% and you must have less than 15 minutes to run this command. Please contact an administrator for assistance."
-                stop
-            else if {_time} is less than or equal to 15 minutes:
+            if {_p} is "BlitzentYT":
                 set {_code} to arg-1
                 loop {referrals::codes::*}:
-                    if loop-value is "%{_code}%":
+                    if loop-value is {_code}:
                         loop {referrals::codes::%{_code}%::*}:
-                            if loop-value is in {referrals::owner::%{_code}%}:
-                                if loop-value is in {players::*}:
-                                    set {_toReward} to loop-value
+                            if loop-value-2 is in {referrals::owner::%{_code}%::*}:
+                                if loop-value-2 is in {players::*}:
+                                    set {_toReward} to loop-value-2
                                     send "&aReferral Successful!" to {_p}
                                     execute console command "eco credits give %{_p}% 10"
                                     execute console command "eco credits give %{_toReward}% 50"
@@ -34,12 +29,30 @@ command /referral [<text>]:
                                     send "&cReferral Failed. Please check spelling or contact administration!" to sender
                             else:
                                 send "&cReferral Failed. Please check spelling or contact administration!" to sender
-                        else:
-                            send "&cReferral Failed. Please check spelling or contact administration!" to sender
                     else:
                         send "&cReferral Failed. Please check spelling or contact administration!" to sender
-                else:
-                    send "&cReferral Failed. Please check spelling or contact administration!" to sender
+            else:
+                set {_time} to time since first login of {_p}
+                if {_time} is greater than 15 minutes:
+                    send "&cSorry, but you have been in this server for longer than 15 minutes and you must have less than 15 minutes to run this command. Please contact an administrator for assistance."
+                    stop
+                else if {_time} is less than or equal to 15 minutes:
+                    set {_code} to arg-1
+                    loop {referrals::codes::*}:
+                        if loop-value is {_code}:
+                            loop {referrals::codes::%{_code}%::*}:
+                                if loop-value-2 is in {referrals::owner::%{_code}%::*}:
+                                    if loop-value-2 is in {players::*}:
+                                        set {_toReward} to loop-value-2
+                                        send "&aReferral Successful!" to {_p}
+                                        execute console command "eco credits give %{_p}% 10"
+                                        execute console command "eco credits give %{_toReward}% 50"
+                                    else:
+                                        send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                                else:
+                                    send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                        else:
+                            send "&cReferral Failed. Please check spelling or contact administration!" to sender
             
 command /createreferral [<text>]:
     permission: referral.create
@@ -51,15 +64,15 @@ command /createreferral [<text>]:
             set {_p} to player
             set {_toCreate} to arg-1
             loop {referrals::owner::*}:
-                if loop-value contains {_p}:
+                if loop-value-1 contains {_p}:
                     send "&cYou can only create one code! Contact an admin if this is incorrect." to sender
                 else:
                     loop {referrals::codes::*}:
-                        if loop-value contains {_toCreate}:
+                        if loop-value-2 contains {_toCreate}:
                             send "&cThis code is too similar to an existing one." to sender
                         else:
                             add "%{_toCreate}%" to {referrals::codes::*}
-                            add "%{_p}%" to {referrals::owner::%{_toCreate}%}
+                            add "%{_p}%" to {referrals::owner::%{_toCreate}%::*}
                             add "%{_p}%" to {referrals::codes::%{_toCreate}%::*}
                             send "&aCode created successfully!" to sender
 command /deletereferral [<text>]:
@@ -72,11 +85,11 @@ command /deletereferral [<text>]:
             set {_p} to player
             set {_toDelete} to arg-1
             loop {referrals::codes::*}:
-                if loop-value is "%{_toDelete}%":
-                    loop {referrals::owner::%{_toDelete}%}:
-                        if loop-value is "%{_p}%":
+                if loop-value-1 is "%{_toDelete}%":
+                    loop {referrals::owner::%{_toDelete}%::*}:
+                        if loop-value-2 is "%{_p}%":
                             remove "%{_toDelete}%" from {referrals::codes::*}
-                            delete {referrals::owner::%{_toDelete}%}
+                            delete {referrals::owner::%{_toDelete}%::*}
                             send "&aCode successfully deleted!" to sender
                         else:
                             send "&cYou are not allowed to delete a code that you do not own!" to sender
