@@ -1,3 +1,81 @@
-# A system that allows players to refer others to the server and get credit for that player's first join
 on load:
-  
+    if {players::*} is not set:
+        set {players::*} to empty
+    if {referrals::*} is not set:
+        set {referrals::codes::*} to empty
+        set {referrals::owner::*} to empty
+on join:
+    set {_p} to player
+    loop {players::*}:
+        if loop-value does not contain "%{_p}%":
+            add "%{_p}%" to {players::*}
+command /referral <code>:
+    trigger:
+        if arg-1 is not set:
+            send "&6Usage:&c /referral <code> | Contact an admin for further help." to sender
+        else:
+            set {_p} to player
+            set {_time} to time since first login of {_p}
+            if {_time} is greater than 15 minutes:
+                send "&cSorry, but you have been in this server for %{_time}% and you must have less than 15 minutes to run this command. Please contact an administrator for assistance."
+                stop
+            else if {_time} is less than or equal to 15 minutes:
+                set {_code} to arg-1
+                loop {referrals::codes::*}:
+                    if loop-value is "%{_code}%":
+                        loop {referrals::codes::%{_code}%::*}:
+                            if loop-value is in {referrals::owner::%{_code}%}:
+                                if loop-value is in {players::*}:
+                                    set {_toReward} to loop-value
+                                    send "&aReferral Successful!" to {_p}
+                                else:
+                                    send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                            else:
+                                send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                        else:
+                            send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                    else:
+                        send "&cReferral Failed. Please check spelling or contact administration!" to sender
+                else:
+                    send "&cReferral Failed. Please check spelling or contact administration!" to sender
+            
+command /createreferral <code>:
+    permission: referral.create
+    permission message: "&cYou must have media rank to use this command."
+    cooldown: 7 days
+    cooldown message: "&cYou must wait 7 days between creating a code."
+    trigger:
+        if arg-1 is not set:
+            send "&6Usage:&c /createreferral <code> | Contact an admin for further help." to sender
+        else:
+            set {_p} to player
+            set {_toCreate} to arg-1
+            loop {referrals::owner::*}:
+                if loop-value contains {_p}:
+                    send "&cYou can only create one code! Contact an admin if this is incorrect." to sender
+                else:
+                    loop {referrals::codes::*}:
+                        if loop-value contains {_toCreate}:
+                            send "&cThis code is too similar to an existing one." to sender
+                        else:
+                            add "%{_toCreate}%" to {referrals::codes::*}
+                            add "%{_p}%" to {referrals::owner::%{toCreate}%}
+                            send "&aCode created successfully!" to sender
+command /deletereferral <code>:
+    permission: referral.delete
+    permission message: "&cYou must have media rank to use this command."
+    trigger:
+        if arg-1 is not set:
+            send "&6Usage:&c /deletereferral <code> | Contact an admin if this is incorrect." to sender
+        else:
+            set {_p} to player
+            set {_toDelete} to arg-1
+            loop {referrals::codes::*}:
+                if loop-value is "%{_toDelete}%":
+                    loop {referrals::owner::%{_toDelete}%}:
+                        if loop-value is "%{_p}%":
+                            remove "%{_toDelete}%" from {referrals::codes::*}
+                            delete {referrals::owner::%{_toDelete}%}
+                            send "&aCode successfully deleted!" to sender
+                        else:
+                            send "&cYou are not allowed to delete a code that you do not own!" to sender
