@@ -1,0 +1,62 @@
+#Reloads/Sets Messages with Dependent Variables
+function randReloadMsg():
+    #Sets Messages for randomizer
+    set {_rand.Prefix} to "&6&lRANDOMIZER >>"
+    set {_rand.Err.NoMode} to "%{_rand.Prefix}% &cMust have gamemode selected to function! (/random Mode activate <mode>)"
+    set {_rand.Suc.SetMode} to "%{_rand.Prefix}% &a%{_rand.Mode.On}% activated! (/random reload)"
+    set {_rand.Err.SetMode.Max} to "%{_rand.Prefix}% &cYou already have &6%{_rand.Mode.On.Count}%/%{_rand.Mode.On.Max}%&c Activated! (/random Max Set <num>)"
+    set {_rand.Err.Exist} to "%{_rand.Prefix}% &cThis mode does not exist! (/random Mode List)"
+    set {_rand.suc.SetMax} to "%{_rand.Prefix}% &aMax set to %{_rand.Mode.On.Max}%!"
+on load:
+    randReloadMsg()
+    #Sets Limits and other Values
+    if {_rand.Mode.On.Max} is not set:
+        set {_rand.Mode.On.Max} to 1
+    if {_rand.Mode.Count} is not set:
+        set {_rand.Mode.Count} to 0
+    if {_rand.Mode.On.Count} is not set:
+        set {_rand.Mode.On.Count} to 0
+    if {_rand.Mode.On} is not set:
+        set {_rand.Mode.On} to ""
+    set {rand::Modes::*} to "items", "effects", and "both"
+
+#--------------------------------------------
+
+#Checks if gamemode is set
+every 10 minutes:
+    if {rand.gamemode} is not set:
+        send "%{_rand.Err.noMode}%" to console
+        loop all players:
+            if loop-player has permission "randomizer.admin":
+                send "%{_rand.Err.noMode}%" to loop-player
+command /random <text> <text> <text>:
+    permission: randomizer.admin
+    trigger:
+        set {_p} to sender
+        set {_mode} to arg-3
+        if arg-1 is "mode":
+            if arg-2 is "activate":
+                if {_mode} is in {rand::Modes::*}:
+                    add 1 to {_rand.Mode.On.Count}
+                    if {_rand.Mode.On.Count} is greater than {_rand.Mode.On.Max}:
+                        randReloadMsg()
+                        send "%{_rand.Err.SetMode.Max}%" to {_p}
+                    set {_rand.Mode.On} to arg-2
+                    randReloadMsg()
+                    send "%{_rand.Suc.SetMode}%" to {_p}
+                else:
+                    send "%{_rand.Err.Exist}%" to {_p}
+            else if arg-2 is "list":
+                loop {rand::Modes::*}:
+                    send "> %loop-value%" to {_p}
+        else if arg-1 is "max":
+            if arg-2 is "set":
+                set {_rand.Mode.On.Max} to arg-3
+                randReloadMsg()
+                send "%{_rand.Suc.SetMax}%" to {_p}
+            else:
+                randReloadMsg()
+                send "%{_rand.Prefix}% &aMax: &e%{_rand.Mode.On.Max}%" to {_p}
+        else if arg-1 is "reload":
+            execute console command "sk reload random.sk"
+            send "%{_rand.Prefix}% &eReloaded! Check with console if you believe an error has occurred!"
