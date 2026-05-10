@@ -1,0 +1,58 @@
+on load:
+    set {DivLine} to "&f---------------------"
+
+
+
+function divLine(layer: text):
+    if {_layer} is "top":
+        send "                                 " to {_p}
+        send "%{DivLine}%" to {_p}
+    if {_layer} is "bottom":
+        send "%{DivLine}%" to {_p}
+        send "                                 " to {_p}
+
+function sendStat(stat: text):
+    if {stat} is "strength":
+        send "&c&lStrength: %{strength.%{_p}%}%" to {_p}
+    if {stat} is "endurance":
+        send "&3&lEndurance: %{endurance.%{_p}%}%" to {_p}
+    if {stat} is "agility":
+        send "&e&lAgility: %{agility.%{_p}%}%" to {_p}
+    if {stat} is "wisdom":
+        send "&d&lWisdom: %{wisdom.%{_p}%}%" to {_p}
+    if {stat} is "luck":
+        send "&a&lLuck: %{luck.%{_p}%}%" to {_p}
+    if {stat} is "points":
+        send "&b&lAvailable Points: %{points.%{_p}%}%"
+    if {stat} is "header":
+        send "&6&lSTATS:" to {_p}
+function checkStatsAreSet():
+    if {joined.%{_p}%} is not set:
+        set {strength.%{_p}%} to 2
+        set {luck.%{_p}%} to 2
+        set {endurance.%{_p}%} to 2
+        set {wisdom.%{_p}%} to 2
+        set {dexterity.%{_p}%} to 2
+        set {points.%{_p}%} to 3
+        set {joined.%{_p}%} to 1
+on join:
+    set {_p} to player
+    checkStatsAreSet()
+command /stats <text> <text>:
+    trigger:
+        set {_p} to "%player%"
+        checkStatsAreSet()
+        if arg-1 is "check":
+            if arg-2 is not set:
+                divLine("top")
+                sendStat("header")
+                sendStat("endurance")
+                sendStat("agility")
+                sendStat("wisdom")
+                sendStat("luck")
+                sendStat("points")
+                divLine("bottom")
+            else:
+                divLine("top")
+                sendStat("%arg-2%")
+                divLine("bottom")
