@@ -17,13 +17,6 @@ function divLine(layer: text, player: player):
         send "%{DivLine}%" to {_player}
         send "                                 " to {_player}
 
-function updateAttributes(p: player):
-    set attribute "generic.attack_damage" of {_p} to (0 + (0.5 * {strength::%{_p}%}))
-    set attribute "generic.block_break_speed" of {_p} to (0 + (0.5 * {strength::%{_p}%}))
-    set attribute "generic.movement_speed" of {_p} to (0 + (0.5 * {agility::%{_p}%}))
-    set attribute "generic.safe_fall_distance" of {_p} to (0 + (0.5 * {agility::%{_p}%}))
-    set attribute "generic.max_health" of {_p} to (0 + (0.5 * {endurance::%{_p}%}))
-    set attribute "generic.armor_toughness" of {_p} to (0 + (0.5 * {endurance::%{_p}%}))
 function sendStat(stat: text, player: player):
     set {_p} to {_player}
     if {_stat} is "all":
@@ -57,7 +50,8 @@ function checkStatsAreSet(player: player):
         set {wisdom::%{_p}%} to 2
         set {agility::%{_p}%} to 2
         set {points::%{_p}%} to 3
-        set {joined.%{_p}%} to 1
+        set {joined::%{_p}%} to 1
+        set {total::%{_p}%} to ({strength::%{_p}%} + {luck::%{_p}%} + {endurance::%{_p}%} + {wisdom::%{_p}%} + {agility::%{_p}%})
 function msgForm(toChange: text):: text:
     set {_toChg} to lowercase {_toChange}
     if {_toChg} is "strength":
@@ -72,6 +66,28 @@ function msgForm(toChange: text):: text:
         return {luc.msg}
     if {_toChg} is "points":
         return {pt.msg}
+
+
+on damage:
+    if attacker is a player:
+        set {_a} to attacker
+        set {_v} to victim
+        cancel event
+        set {_dmg} to ({strength::%{_a}%} * 0.5)
+        set {_res} to ({endurance::%{_v}%} * 0.5)
+        set {_act} to ({_dmg} - {_res})
+        if {_act} is less than 0.5:
+            set {_act} to 0.5
+        damage {_v} by {_act}
+        send "&f%{_a}%&c has attacked you!" to {_v}
+        send "&cYou have attacked &f%{_v}%&c!" to {_a}
+on death of player:
+    set {_v} to victim
+    if attacker is a player:
+        set {_k} to attacker
+        if {_k} == {_v}:
+            stop
+        set {_xp} to rounded ({total::%{_v}%} / 2)
 on join:
     set {_p} to player
     checkStatsAreSet({_p})
