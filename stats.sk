@@ -1,58 +1,131 @@
 on load:
     set {DivLine} to "&f---------------------"
+    set {stats::*} to "strength", "endurance", "agility", "wisdom", "luck", and "points"
+    set {str.msg} to "&c&lStrength&r"
+    set {end.msg} to "&3&lEndurance&r"
+    set {agi.msg} to "&e&lAgility&r"
+    set {wis.msg} to "&d&lWisdom&r"
+    set {luc.msg} to "&a&lLuck&r"
+    set {pt.msg} to "&b&lAvailable Points&r"
+    set {tab::stats::1::*} to "check", and "upgrade"
 
-
-
-function divLine(layer: text):
+function divLine(layer: text, player: player):
     if {_layer} is "top":
-        send "                                 " to {_p}
-        send "%{DivLine}%" to {_p}
+        send "                                 " to {_player}
+        send "%{DivLine}%" to {_player}
     if {_layer} is "bottom":
-        send "%{DivLine}%" to {_p}
-        send "                                 " to {_p}
+        send "%{DivLine}%" to {_player}
+        send "                                 " to {_player}
 
-function sendStat(stat: text):
-    if {stat} is "strength":
-        send "&c&lStrength: %{strength.%{_p}%}%" to {_p}
-    if {stat} is "endurance":
-        send "&3&lEndurance: %{endurance.%{_p}%}%" to {_p}
-    if {stat} is "agility":
-        send "&e&lAgility: %{agility.%{_p}%}%" to {_p}
-    if {stat} is "wisdom":
-        send "&d&lWisdom: %{wisdom.%{_p}%}%" to {_p}
-    if {stat} is "luck":
-        send "&a&lLuck: %{luck.%{_p}%}%" to {_p}
-    if {stat} is "points":
-        send "&b&lAvailable Points: %{points.%{_p}%}%"
-    if {stat} is "header":
+function updateAttributes(p: player):
+    set attribute "generic.attack_damage" of {_p} to (0 + (0.5 * {strength::%{_p}%}))
+    set attribute "generic.block_break_speed" of {_p} to (0 + (0.5 * {strength::%{_p}%}))
+    set attribute "generic.movement_speed" of {_p} to (0 + (0.5 * {agility::%{_p}%}))
+    set attribute "generic.safe_fall_distance" of {_p} to (0 + (0.5 * {agility::%{_p}%}))
+    set attribute "generic.max_health" of {_p} to (0 + (0.5 * {endurance::%{_p}%}))
+    set attribute "generic.armor_toughness" of {_p} to (0 + (0.5 * {endurance::%{_p}%}))
+function sendStat(stat: text, player: player):
+    set {_p} to {_player}
+    if {_stat} is "all":
         send "&6&lSTATS:" to {_p}
-function checkStatsAreSet():
+        send "%{str.msg}%: %{strength::%{_p}%}%" to {_p}
+        send "%{end.msg}%: %{endurance::%{_p}%}%" to {_p}
+        send "%{agi.msg}%: %{agility::%{_p}%}%" to {_p}
+        send "%{wis.msg}%: %{wisdom::%{_p}%}%" to {_p}
+        send "%{luc.msg}%: %{luck::%{_p}%}%" to {_p}
+        send "%{pt.msg}%: %{points::%{_p}%}%" to {_p}
+    if {_stat} is "strength":
+        send "%{str.msg}%: %{strength::%{_p}%}%" to {_p}
+    if {_stat} is "endurance":
+        send "%{end.msg}%: %{endurance::%{_p}%}%" to {_p}
+    if {_stat} is "agility":
+        send "%{agi.msg}%: %{agility::%{_p}%}%" to {_p}
+    if {_stat} is "wisdom":
+        send "%{wis.msg}%: %{wisdom::%{_p}%}%" to {_p}
+    if {_stat} is "luck":
+        send "%{luc.msg}%: %{luck::%{_p}%}%" to {_p}
+    if {_stat} is "points":
+        send "%{pt.msg}%: %{points::%{_p}%}%" to {_p}
+    if {_stat} is "header":
+        send "&6&lSTATS:" to {_p}
+function checkStatsAreSet(player: player):
+    set {_p} to {_player}
     if {joined.%{_p}%} is not set:
-        set {strength.%{_p}%} to 2
-        set {luck.%{_p}%} to 2
-        set {endurance.%{_p}%} to 2
-        set {wisdom.%{_p}%} to 2
-        set {dexterity.%{_p}%} to 2
-        set {points.%{_p}%} to 3
+        set {strength::%{_p}%} to 2
+        set {luck::%{_p}%} to 2
+        set {endurance::%{_p}%} to 2
+        set {wisdom::%{_p}%} to 2
+        set {agility::%{_p}%} to 2
+        set {points::%{_p}%} to 3
         set {joined.%{_p}%} to 1
+function msgForm(toChange: text):: text:
+    set {_toChg} to lowercase {_toChange}
+    if {_toChg} is "strength":
+        return {str.msg}
+    if {_toChg} is "endurance":
+        return {end.msg}
+    if {_toChg} is "agility":
+        return {agi.msg}
+    if {_toChg} is "wisdom":
+        return {wis.msg}
+    if {_toChg} is "luck":
+        return {luc.msg}
+    if {_toChg} is "points":
+        return {pt.msg}
 on join:
     set {_p} to player
-    checkStatsAreSet()
-command /stats <text> <text>:
+    checkStatsAreSet({_p})
+on tab complete of "/stats":
+    set tab completions for position 1 to "check", "reset", and "upgrade"
+    set tab completions for position 2 to {stats::*}
+command /stats <text> [<text>]:
     trigger:
-        set {_p} to "%player%"
-        checkStatsAreSet()
-        if arg-1 is "check":
-            if arg-2 is not set:
-                divLine("top")
-                sendStat("header")
-                sendStat("endurance")
-                sendStat("agility")
-                sendStat("wisdom")
-                sendStat("luck")
-                sendStat("points")
-                divLine("bottom")
+        set {_p} to player
+        checkStatsAreSet({_p})
+        if arg-2 is set:
+            set {_arg2} to lowercase arg-2
+        else:
+            set {_arg2} to ""
+        if arg-1 is set:
+            set {_arg1} to lowercase arg-1
+        else:
+            set {_arg1} to ""
+        if {_arg1} is "check":
+            if {_arg2} is "":
+                divLine("top", {_p})
+                sendStat("all", {_p})
+                divLine("bottom", {_p})
             else:
-                divLine("top")
-                sendStat("%arg-2%")
-                divLine("bottom")
+                if {stats::*} contains {_arg2}:
+                    set {_toSend} to {_arg2}
+                    divLine("top", {_p})
+                    sendStat({_toSend}, {_p})
+                    divLine("bottom", {_p})
+                else:
+                    send "&cMust enter an existing stat!" to {_p}
+        else if {_arg1} is "upgrade":
+            if {stats::*} contains {_arg2}:
+                set {_toUpg} to {_arg2}
+                if {points::%{_p}%} is greater than or equal to 1:
+                    add 1 to {%{_toUpg}%::%{_p}%}
+                    remove 1 from {points::%{_p}%}
+                    set {_msgFrm} to msgForm({_toUpg})
+                    divLine("top", {_p})
+                    send "&aAdded 1 point to %{_msgFrm}%!"
+                    send "&aNew level of %{_msgFrm}%: %{%{_toUpg}%::%{_p}%}%"
+                    send "&aNew amount of %{pt.msg}%: %{points::%{_p}%}%"
+                    divLine("bottom", {_p})
+                else:
+                    send "&cMust have at least 1 available stat point!" to {_p}
+            else:
+                send "&cMust enter an existing stat!" to {_p}
+        else if {_arg1} is "reset":
+            if {_p} is op:
+                set {strength::%{_p}%} to 2
+                set {endurance::%{_p}%} to 2
+                set {agility::%{_p}%} to 2
+                set {wisdom::%{_p}%} to 2
+                set {luck::%{_p}%} to 2
+                set {points::%{_p}%} to 3
+                send "&cReset all stats!" to {_p}
+
