@@ -8,6 +8,9 @@ on load:
     set {luc.msg} to "&a&lLuck&r"
     set {pt.msg} to "&b&lAvailable Points&r"
     set {tab::stats::1::*} to "check", and "upgrade"
+    set {monster::t1::*} to ""
+    set {monster::t2::*} to ""
+    set {monster::t3::*} to ""
 
 function divLine(layer: text, player: player):
     if {_layer} is "top":
@@ -30,7 +33,20 @@ on spawn:
         if event-entity is not a player:
             set {_type} to "%type of entity%"
             set {_mob} to entity
-            
+            setMonsterStat({_mob})
+            set {_stats} to {monster::tot::%{_mob}%}
+            if {_stats} is between 1 and 20:
+                add {_mob} to {monster::t1::*}
+                set {_tier} to 1
+                set {tierMsg::%{_mob}%} to "&f[&a&lT1&f]"
+            else if {_stats} is between 21 and 40:
+                add {_mob} to {monster::t2::*}
+                set {_tier} to 2
+                set {tierMsg::%{_mob}%} to "&f[&6&lT2&f]"
+            else if {_stats} is between 41 and 60:
+                add {_mob} to {monster::t3::*}
+                set {_tier} to 3
+                set {tierMsg::%{_mob}%} to "&f[&c&lT3&f]"
 function sendStat(stat: text, player: player):
     set {_p} to {_player}
     if {_stat} is "all":
