@@ -12,13 +12,13 @@ on load:
     set {monster::t2::*} to ""
     set {monster::t3::*} to ""
 
-function divLine(layer: text, player: player):
+function divLine(layer: text, p: player):
     if {_layer} is "top":
-        send "                                 " to {_player}
-        send "%{DivLine}%" to {_player}
+        send "                                 " to {_p}
+        send "%{DivLine}%" to {_p}
     if {_layer} is "bottom":
-        send "%{DivLine}%" to {_player}
-        send "                                 " to {_player}
+        send "%{DivLine}%" to {_p}
+        send "                                 " to {_p}
 function setMonsterStat(mob: entity):
     set {_randMulti} to random integer between 2 and 10
     set {monster::strength::%{_mob}%} to (2 * {_randMulti})
@@ -47,8 +47,7 @@ on spawn:
                 add {_mob} to {monster::t3::*}
                 set {_tier} to 3
                 set {tierMsg::%{_mob}%} to "&f[&c&lT3&f]"
-function sendStat(stat: text, player: player):
-    set {_p} to {_player}
+function sendStat(stat: text, p: player):
     if {_stat} is "all":
         send "&6&lSTATS:" to {_p}
         send "%{str.msg}%: %{player::strength::%{_p}%}%" to {_p}
@@ -80,6 +79,8 @@ function checkStatsAreSet(player: player):
         set {player::wisdom::%{_p}%} to 2
         set {player::agility::%{_p}%} to 2
         set {player::pts::%{_p}%} to 3
+        set {player::xp::%{_p}%} to 0
+        set {player::lvl::%{_p}%} to 1
         set {joined::%{_p}%} to 1
         set {player::tot::%{_p}%} to ({player::strength::%{_p}%} + {player::luck::%{_p}%} + {player::endurance::%{_p}%} + {player::wisdom::%{_p}%} + {player::agility::%{_p}%})
 function msgForm(toChange: text):: text:
@@ -97,6 +98,19 @@ function msgForm(toChange: text):: text:
     if {_toChg} is "points":
         return {pt.msg}
 
+function checkLvl(p: player):
+    set {_rand} to random integer between ({player:lvl::%{_p}%} * 2) and ({player::lvl::%{_p}%} * 10)
+    set {_xp2Lvl} to ({player::lvl::%{_p}%} * {_rand})
+    if {player::xp::%{_p}%} is greater than or equal to {_xp2Lvl}:
+        set {_dif} to ({player::xp::%{_p}%} - {_xp2Lvl})
+        add 1 to {player::lvl::%{_p}%}
+        set {player::xp::%{_p}%} to {_dif}
+        divLine("top", {_p})
+        send "&aYou have leveled up!" to {_p}
+        send "&aNew Level: %{player::lvl::%{_p}%}%" to {_p}
+        divLine("bottom", {_p})
+    set {_xp2Lvl} to ({player::lvl::%{_p}%} * {_rand})
+    send "&d&lEXP: %{player::xp::%{_p}%}%/%{_xp2Lvl}%" to {_p}
 
 on damage:
     if attacker is a player:
@@ -124,7 +138,11 @@ on death of player:
             stop
         if {_v} is not a player:
             stop
-        set {_xp} to rounded ({player::tot::%{_v}%} / 2)
+        set {_xp} to random integer between ({player::tot::%{_v}%} / 2) and ({player::tot::%{_v}%} * 2)
+        add {_xp} to {player::xp::%{_k}%}
+        send "&aYou have gained %{_xp}% XP!"
+        checkLvl({_p})
+
 on join:
     set {_p} to player
     checkStatsAreSet({_p})
@@ -180,5 +198,7 @@ command /stats <text> [<text>]:
                 set {player::wisdom::%{_p}%} to 2
                 set {player::luck::%{_p}%} to 2
                 set {player::pts::%{_p}%} to 3
+                set {player::xp::%{_p}%} to 0
+                set {player::lvl:%{_p}%} to 1
                 send "&cReset all stats!" to {_p}
 
