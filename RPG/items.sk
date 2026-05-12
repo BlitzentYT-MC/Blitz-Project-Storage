@@ -1,0 +1,20 @@
+on load:
+
+
+
+command /rpgitem <text> <text> <int> <int> <int>:
+    trigger:
+        set {_p} to sender
+        set {_name} to arg-1
+        set {_type} to arg-2
+        set {_dmg} to arg-3
+        set {_dur} to arg-4
+        set {_lvl} to arg-5
+        if {_p} is op:
+            if {_type} is "sword":
+                set {_item} to a diamond sword named "%{_name}%"
+                set durability of {_item} to {_dur}
+                set tag "lvlReq" of {_item} to {_lvl}
+                add {_item} to {items::swords::*}
+
+
