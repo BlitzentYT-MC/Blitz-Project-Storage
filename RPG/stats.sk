@@ -16,42 +16,56 @@ function divLine(layer: text, player: player):
     if {_layer} is "bottom":
         send "%{DivLine}%" to {_player}
         send "                                 " to {_player}
-
+function setMonsterStat(mob: entity):
+    set {_randMulti} to random integer between 2 and 10
+    set {monster::str::%{_mob}%} to (2 * {_randMulti})
+    set {monster::luc::%{_mob}%} to (2 * {_randMulti})
+    set {monster::end::%{_mob}%} to (2 * {_randMulti})
+    set {monster::wis::%{_mob}%} to (2 * {_randMulti})
+    set {monster::agi::%{_mob}%} to (2 * {_randMulti})
+    set {monster::exp::%{_mob}%} to (10 * {_randMulti})
+    set {monster::tot::%{_mob}%} to ({monster::str::%{_mob}%} + {monster::luc::%{_mob}%} + {monster::end::%{_mob}%} + {monster::wis::%{_mob}%} + {monster::agi::%{_mob}%})
+on spawn:
+    if event-entity is alive:
+        if event-entity is not a player:
+            set {_type} to "%type of entity%"
+            set {_mob} to entity
+            
 function sendStat(stat: text, player: player):
     set {_p} to {_player}
     if {_stat} is "all":
         send "&6&lSTATS:" to {_p}
-        send "%{str.msg}%: %{strength::%{_p}%}%" to {_p}
-        send "%{end.msg}%: %{endurance::%{_p}%}%" to {_p}
-        send "%{agi.msg}%: %{agility::%{_p}%}%" to {_p}
-        send "%{wis.msg}%: %{wisdom::%{_p}%}%" to {_p}
-        send "%{luc.msg}%: %{luck::%{_p}%}%" to {_p}
-        send "%{pt.msg}%: %{points::%{_p}%}%" to {_p}
+        send "%{str.msg}%: %{player::str::%{_p}%}%" to {_p}
+        send "%{end.msg}%: %{player::end::%{_p}%}%" to {_p}
+        send "%{agi.msg}%: %{player::agi::%{_p}%}%" to {_p}
+        send "%{wis.msg}%: %{player::wis::%{_p}%}%" to {_p}
+        send "%{luc.msg}%: %{player::luc::%{_p}%}%" to {_p}
+        send "%{pt.msg}%: %{player::pts::%{_p}%}%" to {_p}
     if {_stat} is "strength":
-        send "%{str.msg}%: %{strength::%{_p}%}%" to {_p}
+        send "%{str.msg}%: %{player::str::%{_p}%}%" to {_p}
     if {_stat} is "endurance":
-        send "%{end.msg}%: %{endurance::%{_p}%}%" to {_p}
+        send "%{end.msg}%: %{player::end::%{_p}%}%" to {_p}
     if {_stat} is "agility":
-        send "%{agi.msg}%: %{agility::%{_p}%}%" to {_p}
+        send "%{agi.msg}%: %{player::agi::%{_p}%}%" to {_p}
     if {_stat} is "wisdom":
-        send "%{wis.msg}%: %{wisdom::%{_p}%}%" to {_p}
+        send "%{wis.msg}%: %{player::wis::%{_p}%}%" to {_p}
     if {_stat} is "luck":
-        send "%{luc.msg}%: %{luck::%{_p}%}%" to {_p}
+        send "%{luc.msg}%: %{player::luc::%{_p}%}%" to {_p}
     if {_stat} is "points":
-        send "%{pt.msg}%: %{points::%{_p}%}%" to {_p}
+        send "%{pt.msg}%: %{player::pts::%{_p}%}%" to {_p}
     if {_stat} is "header":
         send "&6&lSTATS:" to {_p}
 function checkStatsAreSet(player: player):
     set {_p} to {_player}
     if {joined.%{_p}%} is not set:
-        set {strength::%{_p}%} to 2
-        set {luck::%{_p}%} to 2
-        set {endurance::%{_p}%} to 2
-        set {wisdom::%{_p}%} to 2
-        set {agility::%{_p}%} to 2
-        set {points::%{_p}%} to 3
+        set {player::str::%{_p}%} to 2
+        set {player::luc::%{_p}%} to 2
+        set {player::end::%{_p}%} to 2
+        set {player::wis::%{_p}%} to 2
+        set {player::agi::%{_p}%} to 2
+        set {player::pts::%{_p}%} to 3
         set {joined::%{_p}%} to 1
-        set {total::%{_p}%} to ({strength::%{_p}%} + {luck::%{_p}%} + {endurance::%{_p}%} + {wisdom::%{_p}%} + {agility::%{_p}%})
+        set {player::tot::%{_p}%} to ({player::str::%{_p}%} + {player::luc::%{_p}%} + {player::end::%{_p}%} + {player::wis::%{_p}%} + {player::agi::%{_p}%})
 function msgForm(toChange: text):: text:
     set {_toChg} to lowercase {_toChange}
     if {_toChg} is "strength":
@@ -71,23 +85,31 @@ function msgForm(toChange: text):: text:
 on damage:
     if attacker is a player:
         set {_a} to attacker
-        set {_v} to victim
-        cancel event
-        set {_dmg} to ({strength::%{_a}%} * 0.5)
-        set {_res} to ({endurance::%{_v}%} * 0.5)
-        set {_act} to ({_dmg} - {_res})
-        if {_act} is less than 0.5:
-            set {_act} to 0.5
-        damage {_v} by {_act}
-        send "&f%{_a}%&c has attacked you!" to {_v}
-        send "&cYou have attacked &f%{_v}%&c!" to {_a}
+        if victim is a player:
+            set {_v} to victim
+            cancel event
+            set {_dmg} to ({player::strength::%{_a}%} * 0.5)
+            set {_res} to ({player::endurance::%{_v}%} * 0.5)
+            set {_act} to ({_dmg} - {_res})
+            if {_act} is less than 0.5:
+                set {_act} to 0.5
+            damage {_v} by {_act}
+            send "&f%{_a}%&c has attacked you!" to {_v}
+            send "&cYou have attacked &f%{_v}%&c!" to {_a}
+        else:
+            set {_v} to victim
+            cancel event
+            set {_dmg} to {player::str::%{_a}%} * 0.5
+            set {_res} to {monster::end::%{_v}%} * 0.5
 on death of player:
     set {_v} to victim
     if attacker is a player:
         set {_k} to attacker
         if {_k} == {_v}:
             stop
-        set {_xp} to rounded ({total::%{_v}%} / 2)
+        if {_v} is not a player:
+            stop
+        set {_xp} to rounded ({player::total::%{_v}%} / 2)
 on join:
     set {_p} to player
     checkStatsAreSet({_p})
@@ -122,14 +144,14 @@ command /stats <text> [<text>]:
         else if {_arg1} is "upgrade":
             if {stats::*} contains {_arg2}:
                 set {_toUpg} to {_arg2}
-                if {points::%{_p}%} is greater than or equal to 1:
-                    add 1 to {%{_toUpg}%::%{_p}%}
-                    remove 1 from {points::%{_p}%}
+                if {player::pts::%{_p}%} is greater than or equal to 1:
+                    add 1 to {player::%{_toUpg}%::%{_p}%}
+                    remove 1 from {player::pts::%{_p}%}
                     set {_msgFrm} to msgForm({_toUpg})
                     divLine("top", {_p})
                     send "&aAdded 1 point to %{_msgFrm}%!"
-                    send "&aNew level of %{_msgFrm}%: %{%{_toUpg}%::%{_p}%}%"
-                    send "&aNew amount of %{pt.msg}%: %{points::%{_p}%}%"
+                    send "&aNew level of %{_msgFrm}%: %{player::%{_toUpg}%::%{_p}%}%"
+                    send "&aNew amount of %{pt.msg}%: %{player::pts::%{_p}%}%"
                     divLine("bottom", {_p})
                 else:
                     send "&cMust have at least 1 available stat point!" to {_p}
@@ -137,11 +159,11 @@ command /stats <text> [<text>]:
                 send "&cMust enter an existing stat!" to {_p}
         else if {_arg1} is "reset":
             if {_p} is op:
-                set {strength::%{_p}%} to 2
-                set {endurance::%{_p}%} to 2
-                set {agility::%{_p}%} to 2
-                set {wisdom::%{_p}%} to 2
-                set {luck::%{_p}%} to 2
-                set {points::%{_p}%} to 3
+                set {player::str::%{_p}%} to 2
+                set {player::end::%{_p}%} to 2
+                set {player::agi::%{_p}%} to 2
+                set {player::wis::%{_p}%} to 2
+                set {player::luc::%{_p}%} to 2
+                set {player::pts::%{_p}%} to 3
                 send "&cReset all stats!" to {_p}
 
