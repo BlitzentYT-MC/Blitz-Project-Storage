@@ -21,13 +21,13 @@ function divLine(layer: text, player: player):
         send "                                 " to {_player}
 function setMonsterStat(mob: entity):
     set {_randMulti} to random integer between 2 and 10
-    set {monster::str::%{_mob}%} to (2 * {_randMulti})
-    set {monster::luc::%{_mob}%} to (2 * {_randMulti})
-    set {monster::end::%{_mob}%} to (2 * {_randMulti})
-    set {monster::wis::%{_mob}%} to (2 * {_randMulti})
-    set {monster::agi::%{_mob}%} to (2 * {_randMulti})
+    set {monster::strength::%{_mob}%} to (2 * {_randMulti})
+    set {monster::luck::%{_mob}%} to (2 * {_randMulti})
+    set {monster::endurance::%{_mob}%} to (2 * {_randMulti})
+    set {monster::wisdom::%{_mob}%} to (2 * {_randMulti})
+    set {monster::agility::%{_mob}%} to (2 * {_randMulti})
     set {monster::exp::%{_mob}%} to (10 * {_randMulti})
-    set {monster::tot::%{_mob}%} to ({monster::str::%{_mob}%} + {monster::luc::%{_mob}%} + {monster::end::%{_mob}%} + {monster::wis::%{_mob}%} + {monster::agi::%{_mob}%})
+    set {monster::tot::%{_mob}%} to ({monster::strength::%{_mob}%} + {monster::luck::%{_mob}%} + {monster::endurance::%{_mob}%} + {monster::wisdom::%{_mob}%} + {monster::agility::%{_mob}%})
 on spawn:
     if event-entity is alive:
         if event-entity is not a player:
@@ -51,22 +51,22 @@ function sendStat(stat: text, player: player):
     set {_p} to {_player}
     if {_stat} is "all":
         send "&6&lSTATS:" to {_p}
-        send "%{str.msg}%: %{player::str::%{_p}%}%" to {_p}
-        send "%{end.msg}%: %{player::end::%{_p}%}%" to {_p}
-        send "%{agi.msg}%: %{player::agi::%{_p}%}%" to {_p}
-        send "%{wis.msg}%: %{player::wis::%{_p}%}%" to {_p}
-        send "%{luc.msg}%: %{player::luc::%{_p}%}%" to {_p}
+        send "%{str.msg}%: %{player::strength::%{_p}%}%" to {_p}
+        send "%{end.msg}%: %{player::endurance::%{_p}%}%" to {_p}
+        send "%{agi.msg}%: %{player::agility::%{_p}%}%" to {_p}
+        send "%{wis.msg}%: %{player::wisdom::%{_p}%}%" to {_p}
+        send "%{luc.msg}%: %{player::luck::%{_p}%}%" to {_p}
         send "%{pt.msg}%: %{player::pts::%{_p}%}%" to {_p}
     if {_stat} is "strength":
-        send "%{str.msg}%: %{player::str::%{_p}%}%" to {_p}
+        send "%{str.msg}%: %{player::strength::%{_p}%}%" to {_p}
     if {_stat} is "endurance":
-        send "%{end.msg}%: %{player::end::%{_p}%}%" to {_p}
+        send "%{end.msg}%: %{player::endurance::%{_p}%}%" to {_p}
     if {_stat} is "agility":
-        send "%{agi.msg}%: %{player::agi::%{_p}%}%" to {_p}
+        send "%{agi.msg}%: %{player::agility::%{_p}%}%" to {_p}
     if {_stat} is "wisdom":
-        send "%{wis.msg}%: %{player::wis::%{_p}%}%" to {_p}
+        send "%{wis.msg}%: %{player::wisdom::%{_p}%}%" to {_p}
     if {_stat} is "luck":
-        send "%{luc.msg}%: %{player::luc::%{_p}%}%" to {_p}
+        send "%{luc.msg}%: %{player::luck::%{_p}%}%" to {_p}
     if {_stat} is "points":
         send "%{pt.msg}%: %{player::pts::%{_p}%}%" to {_p}
     if {_stat} is "header":
@@ -74,14 +74,14 @@ function sendStat(stat: text, player: player):
 function checkStatsAreSet(player: player):
     set {_p} to {_player}
     if {joined.%{_p}%} is not set:
-        set {player::str::%{_p}%} to 2
-        set {player::luc::%{_p}%} to 2
-        set {player::end::%{_p}%} to 2
-        set {player::wis::%{_p}%} to 2
-        set {player::agi::%{_p}%} to 2
+        set {player::strength::%{_p}%} to 2
+        set {player::luck::%{_p}%} to 2
+        set {player::endurance::%{_p}%} to 2
+        set {player::wisdom::%{_p}%} to 2
+        set {player::agility::%{_p}%} to 2
         set {player::pts::%{_p}%} to 3
         set {joined::%{_p}%} to 1
-        set {player::tot::%{_p}%} to ({player::str::%{_p}%} + {player::luc::%{_p}%} + {player::end::%{_p}%} + {player::wis::%{_p}%} + {player::agi::%{_p}%})
+        set {player::tot::%{_p}%} to ({player::strength::%{_p}%} + {player::luck::%{_p}%} + {player::endurance::%{_p}%} + {player::wisdom::%{_p}%} + {player::agility::%{_p}%})
 function msgForm(toChange: text):: text:
     set {_toChg} to lowercase {_toChange}
     if {_toChg} is "strength":
@@ -100,32 +100,31 @@ function msgForm(toChange: text):: text:
 
 on damage:
     if attacker is a player:
+        cancel event
         set {_a} to attacker
         if victim is a player:
             set {_v} to victim
-            cancel event
             set {_dmg} to ({player::strength::%{_a}%} * 0.5)
             set {_res} to ({player::endurance::%{_v}%} * 0.5)
-            set {_act} to ({_dmg} - {_res})
-            if {_act} is less than 0.5:
-                set {_act} to 0.5
-            damage {_v} by {_act}
-            send "&f%{_a}%&c has attacked you!" to {_v}
-            send "&cYou have attacked &f%{_v}%&c!" to {_a}
         else:
             set {_v} to victim
-            cancel event
-            set {_dmg} to {player::str::%{_a}%} * 0.5
-            set {_res} to {monster::end::%{_v}%} * 0.5
+            set {_dmg} to ({player::strength::%{_a}%} * 0.5)
+            set {_res} to ({monster::endurance::%{_v}%} * 0.5)
+        set {_act} to ({_dmg} - {_res})
+        if {_act} is less than 0.5:
+            set {_act} to 0.5
+        damage {_v} by {_act}
+        send "&f%{_a}%&c has attacked you!" to {_v}
+        send "&cYou have attacked &f%{_v}%&c!" to {_a}
 on death of player:
     set {_v} to victim
     if attacker is a player:
         set {_k} to attacker
-        if {_k} == {_v}:
+        if {_k} is the same as {_v}:
             stop
         if {_v} is not a player:
             stop
-        set {_xp} to rounded ({player::total::%{_v}%} / 2)
+        set {_xp} to rounded ({player::tot::%{_v}%} / 2)
 on join:
     set {_p} to player
     checkStatsAreSet({_p})
@@ -175,11 +174,11 @@ command /stats <text> [<text>]:
                 send "&cMust enter an existing stat!" to {_p}
         else if {_arg1} is "reset":
             if {_p} is op:
-                set {player::str::%{_p}%} to 2
-                set {player::end::%{_p}%} to 2
-                set {player::agi::%{_p}%} to 2
-                set {player::wis::%{_p}%} to 2
-                set {player::luc::%{_p}%} to 2
+                set {player::strength::%{_p}%} to 2
+                set {player::endurance::%{_p}%} to 2
+                set {player::agility::%{_p}%} to 2
+                set {player::wisdom::%{_p}%} to 2
+                set {player::luck::%{_p}%} to 2
                 set {player::pts::%{_p}%} to 3
                 send "&cReset all stats!" to {_p}
 
