@@ -15,6 +15,9 @@ command /rpgitem <text> <text> <num> <num> <num> <num>:
         set {_lvl} to arg-5
         set {_dmg} to arg-6
         if {_p} is op:
+            if {rpg::*} contains {_item}:
+                send "&cThis item already exists!" to {_p}
+                stop
             if {_type} is "sword":
                 set {_item} to a diamond sword named "%{_name}%"
                 add {_item} to {rpg::swords::*}
