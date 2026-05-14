@@ -1,11 +1,14 @@
-function setAttribute(item: item, dmg: num, lvl: num, str: num, end: num, p: player):
+function setAttribute(item: item, pwr: num, lvl: num, str: num, end: num, agi: num, luc: num, p: player):
     set unbreakable of {_item} to true
     set nbt tag "rpg:lvlReq" of {_item} to {_lvl}
     set nbt tag "rpg:strReq" of {_item} to {_str}
     set nbt tag "rpg:endReq" of {_item} to {_end}
-    set nbt tag "rpg:dmg_res" of {_item} to {_dmg}
+    set nbt tag "rpg:agiReq" of {_item} to {_end}
+    set nbt tag "rpg:lucReq" of {_item} to {_end}
+    set nbt tag "rpg:pwr" of {_item} to {_pwr}
+    set nbt tag "rpg:item" of {_item} to true
     give {_item} to {_p}
-command /rpgitem <text> <text> <num> <num> <num> <num>:
+command /rpgitem <text> <text> <num> <num> <num> <num> <num> <num>:
     trigger:
         set {_p} to sender
         set {_name} to arg-1
@@ -13,11 +16,10 @@ command /rpgitem <text> <text> <num> <num> <num> <num>:
         set {_str} to arg-3
         set {_end} to arg-4
         set {_lvl} to arg-5
-        set {_dmg} to arg-6
+        set {_pwr} to arg-6
+        set {_agi} to arg-7
+        set {_luc} to arg-8
         if {_p} is op:
-            if {rpg::*} contains {_item}:
-                send "&cThis item already exists!" to {_p}
-                stop
             if {_type} is "sword":
                 set {_item} to a diamond sword named "%{_name}%"
                 add {_item} to {rpg::swords::*}
@@ -33,8 +35,44 @@ command /rpgitem <text> <text> <num> <num> <num> <num>:
             if {_type} is "boots":
                 set {_item} to a diamond boots named "%{_name}%"
                 add {_item} to {rpg::boots::*}
-            setAttribute({_item}, {_dmg}, {_lvl}, {_str}, {_end}, {_p})
-                
+            setAttribute({_item}, {_pwr}, {_lvl}, {_str}, {_end}, {_agi}, {_luc}, {_p})
+            send "&aCreated %type of {_item}% named '%{_name}%'!" to {_p}
+on tool change:
+    set {_p} to player
+    set {_t} to tool of {_p}
+    if nbt tag "rpg:item" of {_t} is true:
+        set {_lvlReq} to nbt tag "rpg:lvlReq" of {_t}
+        set {_strReq} to nbt tag "rpg:strReq" of {_t}
+        set {_endReq} to nbt tag "rpg:endReq" of {_t}
+        set {_agiReq} to nbt tag "rpg:agiReq" of {_t}
+        set {_lucReq} to nbt tag "rpg:lucReq" of {_t}
+        set {_pwr} to nbt tag "rpg:pwr" of {_t}
+        set {_lvl} to {player::lvl::%{_p}%}
+        set {_str} to {player::strength::%{_p}%}
+        set {_end} to {player::endurance::%{_p}%}
+        set {_agi} to {player::agility::%{_p}%}
+        set {_luc} to {player::luck::%{_p}%}
+        if {_lvl} is greater than or equal to {_lvlReq}:
+            if {_str} is greater than or equal to {_strReq}:
+                if {_end} is greater than or equal to {_endReq}:
+                    if {_agi} is greater than or equal to {_agiReq}:
+                        if {_luc} is greater than or equal to {_lucReq}:
+                            #Placeholder (TEMPORARY)
+                        else:
+                            send "&cYou need more luck to equip this item! (%{_luc}%/%{_lucReq}%)" to {_p}
+                            cancel event
+                    else:
+                        send "&cYou need more agility to equip this item! &f[&e%{_agi}%/%{_agiReq}%&f]" to {_p}
+                        cancel event
+                else:
+                    send "&cYou need more endurance to equip this item! &f[&e%{_end}%/%{_endReq}%&f]" to {_p}
+                    cancel event
+            else:
+                send "&cYou need more strength to equip this item! &f[&e%{_str}%/%{_strReq}%&f]" to {_p}
+                cancel event
+        else:
+            send "&cYou need more levels to equip this item! &f[&e%{_lvl}%/%{_lvlReq}%&f]" to {_p}
+            cancel event
 
 
 
