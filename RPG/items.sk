@@ -1,20 +1,43 @@
-on load:
-
-
-
-command /rpgitem <text> <text> <int> <int> <int>:
+function setAttribute(item: item, dmg: num, lvl: num, str: num, end: num, p: player):
+    set unbreakable of {_item} to true
+    set nbt tag "rpg:lvlReq" of {_item} to {_lvl}
+    set nbt tag "rpg:strReq" of {_item} to {_str}
+    set nbt tag "rpg:endReq" of {_item} to {_end}
+    set nbt tag "rpg:dmg_res" of {_item} to {_dmg}
+    give {_item} to {_p}
+command /rpgitem <text> <text> <num> <num> <num> <num>:
     trigger:
         set {_p} to sender
         set {_name} to arg-1
         set {_type} to arg-2
-        set {_dmg} to arg-3
-        set {_dur} to arg-4
+        set {_str} to arg-3
+        set {_end} to arg-4
         set {_lvl} to arg-5
+        set {_dmg} to arg-6
         if {_p} is op:
             if {_type} is "sword":
                 set {_item} to a diamond sword named "%{_name}%"
-                set durability of {_item} to {_dur}
-                set tag "lvlReq" of {_item} to {_lvl}
-                add {_item} to {items::swords::*}
+                setAttribute({_item}, {_dmg}, {_lvl}, {_str}, {_end}, {_p})
+                add {_item} to {rpg::swords::*}
+            if {_type} is "helmet":
+                set {_item} to a diamond helmet named "%{_name}%"
+                setAttribute({_item}, {_dmg}, {_lvl}, {_str}, {_end}, {_p})
+                add {_item} to {rpg::helmets::*}
+            if {_type} is "chestplate":
+                set {_item} to a diamond chestplate named "%{_name}%"
+                setAttribute({_item}, {_dmg}, {_lvl}, {_str}, {_end}, {_p})
+                add {_item} to {rpg::chestplate::*}
+            if {_type} is "leggings":
+                set {_item} to a diamond leggings named "%{_name}%"
+                setAttribute({_item}, {_dmg}, {_lvl}, {_str}, {_end}, {_p})
+                add {_item} to {rpg::leggings::*}
+            if {_type} is "boots":
+                set {_item} to a diamond boots named "%{_name}%"
+                setAttribute({_item}, {_dmg}, {_lvl}, {_str}, {_end}, {_p})
+                add {_item} to {rpg::boots::*}
+                
+                
+
+
 
 
